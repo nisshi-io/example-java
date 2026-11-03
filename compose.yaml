@@ -40,6 +40,7 @@ services:
     command: /bin/sleep infinity
   nisshi:
     image: ${NISSHI_IMAGE}
+    pull_policy: always
     restart: unless-stopped
     environment:
       ADVERTISED_LISTENER_URL: ${ADVERTISED_LISTENER_URL}
