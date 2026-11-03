@@ -9,7 +9,6 @@ services:
       - 5432:5432
     volumes:
       - db:/var/lib/postgresql/data
-      - ./etc/initdb.d/:/docker-entrypoint-initdb.d/
     healthcheck:
       test: /usr/bin/pg_isready
       interval: 5s
@@ -49,7 +48,6 @@ services:
       AWS_ENDPOINT: ${AWS_ENDPOINT}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       CLUSTER_ID: ${CLUSTER_ID}
-      PROMETHEUS_LISTENER_URL: ${PROMETHEUS_LISTENER_URL}
       RUST_BACKTRACE: ${RUST_BACKTRACE}
       RUST_LOG: ${RUST_LOG}
       STORAGE_ENGINE: ${STORAGE_ENGINE}
@@ -62,7 +60,9 @@ services:
       --schema-registry file:///schema
     ports:
       - 9092:9092
-      - 9100:9100
+    depends_on:
+      db:
+        condition: service_healthy
 volumes:
   db:
     driver: local

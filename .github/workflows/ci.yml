@@ -23,7 +23,8 @@ jobs:
           - apache/kafka:3.8.1
           - apache/kafka:3.7.0
         nisshi:
-          - ghcr.io/nisshi-io/nisshi:main
+          - ghcr.io/nisshi-io/solace-nisshi:edge
+          - ghcr.io/nisshi-io/solace-nisshi:latest
     runs-on: ${{matrix.os}}
     env:
       ADVERTISED_LISTENER_URL: tcp://nisshi:9092
@@ -34,17 +35,18 @@ jobs:
       AWS_SECRET_ACCESS_KEY: minioadmin
       CLUSTER_ID: kafka-python-integration
       KAFKA_IMAGE: ${{matrix.kafka}}
-      PROMETHEUS_LISTENER_URL: tcp://localhost:9100
       RUST_BACKTRACE: 1
-      RUST_LOG: warn,nisshi_server=debug,nisshi_storage=debug,nisshi_schema_registry=debug
+      RUST_LOG: warn,nisshi_broker=debug,nisshi_storage=debug,nisshi_schema=debug
       STORAGE_ENGINE: ${{matrix.storage}}
       NISSHI_IMAGE: ${{matrix.nisshi}}
     steps:
       - uses: actions/checkout@v4
-      - run: docker compose --ansi never --progress plain up --no-color --quiet-pull --detach
+      # Nisshi checks at startup that its S3 bucket exists, so create the bucket first.
+      - run: docker compose --ansi never --progress plain up --no-color --quiet-pull --detach --wait minio
       - run: docker compose --ansi never exec minio /usr/bin/mc ready local
       - run: docker compose --ansi never exec minio /usr/bin/mc alias set local http://localhost:9000 minioadmin minioadmin
       - run: docker compose --ansi never exec minio /usr/bin/mc mb local/nisshi
+      - run: docker compose --ansi never --progress plain up --no-color --quiet-pull --detach --wait
       - run: sudo apt-get update
       - run: sudo apt-get install -y bats
       - run: docker compose exec db /usr/bin/pg_isready --timeout=60

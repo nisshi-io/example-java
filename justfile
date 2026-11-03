@@ -4,7 +4,10 @@ bats: docker-compose-down up
     bats --trace --verbose-run tests
 
 docker-compose-up:
-    docker compose up --detach
+    docker compose up --detach --wait
+
+minio-up:
+    docker compose up --detach --wait minio
 
 docker-compose-down:
     docker compose down --volumes
@@ -24,7 +27,8 @@ minio-nisshi-bucket:
 minio-ready-local:
     docker compose exec minio /usr/bin/mc ready local
 
-up: docker-compose-up minio-ready-local minio-local-alias minio-nisshi-bucket
+# Nisshi checks at startup that its S3 bucket exists, so create the bucket first.
+up: minio-up minio-ready-local minio-local-alias minio-nisshi-bucket docker-compose-up
 
 psql:
     docker compose exec db psql $*
