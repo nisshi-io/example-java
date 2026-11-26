@@ -40,7 +40,7 @@ jobs:
       STORAGE_ENGINE: ${{matrix.storage}}
       NISSHI_IMAGE: ${{matrix.nisshi}}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       # Nisshi checks at startup that its S3 bucket exists, so create the bucket first.
       - run: docker compose --ansi never --progress plain up --no-color --quiet-pull --detach --wait minio
       - run: docker compose --ansi never exec minio /usr/bin/mc ready local
